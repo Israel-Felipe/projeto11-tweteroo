@@ -8,37 +8,66 @@ app.use(express.json());
 
 const usuarios = [];
 const tweets = [];
-let avatar;
 
 app.post('/sign-up', (req, res) => {
-    const user = req.body;
-    avatar = req.body.avatar;
+    const {username, avatar} = req.body;
 
-    usuarios.push(user);
-    res.send("OK");
+    if (!username || !avatar) {
+        res.status(400).send({
+            erro: 'Todos os campos são obrigatórios!'
+        });
+        return;
+    }
+
+    usuarios.push({username, avatar});
+    res.status(201).send('OK');
 })
 
 app.post('/tweets', (req, res) => {
-    const newTweet = {
-        username: req.body.username,
-        avatar,
-        tweet: req.body.tweet
+
+    const username = req.headers.user;
+    const avatar =  usuarios.find(usuario => usuario.username === username).avatar;
+    const tweet = req.body.tweet;
+
+    if (!tweet || !username) {
+        res.status(400).send({
+            erro: 'Todos os campos são obrigatórios!'
+        });
+        return;
     }
 
-    tweets.push(newTweet);
-    res.send("OK");
+    tweets.push({username, avatar, tweet});
+    res.status(201).send('OK');
 })
 
 app.get('/tweets', (req, res) => {
+    const { page: pageStr = '1' } = req.query;
+    const page = Number(pageStr);
 
-    const dezTweets = tweets.slice(-10)
-    res.send(dezTweets)
-})
+    if (page < 1) {
+        res.status(400).send({
+            erro: 'Página não existente'
+        })
+        return;
+    }
+
+    const ultimosDezTweets = [...tweets].splice((page*10 - 10), 10);
+    
+    res.send(ultimosDezTweets);
+});
 
 
-app.get('/sign-up', (req, res) => {
+app.get('/tweets:username', (req, res) => {
+    const username = req.params.username;
 
-    res.send(usuario)
+    if (!usuarios.find(usuario => usuario.username === username)) {
+        res.status(400).send({
+            erro: 'Usuario não encontrado!'
+    })
+}
+
+    const tweetsUser = tweets.filter(tweet => tweet.username === username)
+    res.send(tweetsUser.reverse())
 })
 
 app.listen(5000, () => console.log('Server listening on port 5000'));
