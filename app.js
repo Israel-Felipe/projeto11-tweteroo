@@ -36,7 +36,7 @@ app.post('/tweets', (req, res) => {
         return;
     }
 
-    tweets.push({username, avatar, tweet});
+    tweets.unshift({username, avatar, tweet});
     res.status(201).send('OK');
 })
 
