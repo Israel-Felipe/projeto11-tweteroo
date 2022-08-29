@@ -6,42 +6,39 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-const usuarios = [
-    {
-        username: 'bobesponja', 
-        avatar: 'https://super.abril.com.br/wp-content/uploads/2020/09/04-09_gato_SITE.jpg?quality=70&strip=info'
-    }
-];
-
-const tweets = [
-    {
-        username: 'bobesponja',
-        tweet: 'eu amo o hub'
-    }
-];
+const usuarios = [];
+const tweets = [];
+let avatar;
 
 app.post('/sign-up', (req, res) => {
-    const usuario = req.body
+    const user = req.body;
+    avatar = req.body.avatar;
 
-    usuarios.push(usuario);
+    usuarios.push(user);
     res.send("OK");
 })
 
 app.post('/tweets', (req, res) => {
-    const tweet = req.body
+    const newTweet = {
+        username: req.body.username,
+        avatar,
+        tweet: req.body.tweet
+    }
 
-    tweets.push(tweet);
+    tweets.push(newTweet);
     res.send("OK");
-})
-
-app.get('/sign-up', (req, res) => {
-
-    res.send(usuarios)
 })
 
 app.get('/tweets', (req, res) => {
 
-    res.send(tweets)
+    const dezTweets = tweets.slice(-10)
+    res.send(dezTweets)
+})
+
+
+app.get('/sign-up', (req, res) => {
+
+    res.send(usuario)
 })
 
 app.listen(5000, () => console.log('Server listening on port 5000'));
